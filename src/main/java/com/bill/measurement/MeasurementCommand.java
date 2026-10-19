@@ -1,6 +1,6 @@
 package com.bill.measurement;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -45,12 +45,12 @@ final class MeasurementCommand {
                     selection.first() == null ? 1 : 2)));
             return 0;
         }
-        if (source.getWorld().dimension() != selection.dimension()) {
+        if (source.getLevel().dimension() != selection.dimension()) {
             source.sendError(Texts.prefixed(Component.translatable("measurement.command.other_dimension")));
             return 0;
         }
 
-        BlockCounter.Result blocks = BlockCounter.count(source.getWorld(), selection.min(), selection.max());
+        BlockCounter.Result blocks = BlockCounter.count(source.getLevel(), selection.min(), selection.max());
         MutableComponent message = Texts.prefixed(Component.translatable("measurement.report.area",
                 Texts.corner(1, selection.first()), Texts.corner(2, selection.second())));
         line(message, "measurement.report.length", Texts.number(selection.length()));
