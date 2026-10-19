@@ -2,7 +2,6 @@ package com.bill.measurement;
 
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,7 +27,7 @@ public final class SelectionTool {
             return InteractionResult.PASS;
         }
         if (Selection.setCorner(corner, level.dimension(), pos)) {
-            Minecraft.getInstance().gui.setOverlayMessage(Texts.cornerSet(corner, Selection.current()), false);
+            player.sendOverlayMessage(Texts.cornerSet(corner, Selection.current()));
         }
         // FAIL stops the block from being broken or used, and nothing is sent to the server
         return InteractionResult.FAIL;
