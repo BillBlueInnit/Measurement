@@ -1,0 +1,73 @@
+package com.bill.measurement.render;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
+
+/** Draws {@link SelectionShapes} with Minecraft 1.21 - 1.21.4 rendering. */
+public final class SelectionRenderer {
+    private static final MultiBufferSource.BufferSource BUFFERS = MultiBufferSource.immediate(new ByteBufferBuilder(4096));
+
+    private SelectionRenderer() {
+    }
+
+    public static void register() {
+        // LAST comes after translucent terrain, particles and weather, so nothing gets drawn over the selection
+        WorldRenderEvents.LAST.register(context -> render(context.matrixStack(), context.camera()));
+    }
+
+    private static void render(PoseStack poseStack, Camera camera) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null) {
+            return;
+        }
+        Vec3 cameraPos = camera.getPosition();
+        SelectionShapes shapes = SelectionShapes.forFrame(minecraft.level.dimension(), cameraPos.x, cameraPos.y, cameraPos.z,
+                camera.rotation(), minecraft.font::width);
+        if (shapes == null) {
+            return;
+        }
+
+        // The see-through render types only skip turning the depth test on; they expect it to be off already.
+        // Sodium and Iris can leave it on at this point, so switch it off, keeping RenderSystem's state in sync.
+        boolean depthTest = GL11.glIsEnabled(GL11.GL_DEPTH_TEST);
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableDepthTest();
+
+        Matrix4f base = poseStack.last().pose();
+        RenderType seeThrough = RenderType.textBackgroundSeeThrough();
+        RenderType depthTested = RenderType.textBackground();
+        // Separate draws, each over the previous one: the faint lines behind blocks, the lines in front of blocks,
+        // the label backgrounds and the label text
+        shapes.lines(sink(BUFFERS.getBuffer(seeThrough), base), SelectionShapes.HIDDEN_ALPHA, 0);
+        BUFFERS.endBatch(seeThrough);
+        shapes.lines(sink(BUFFERS.getBuffer(depthTested), base), 1, SelectionShapes.DEPTH_PULL);
+        BUFFERS.endBatch(depthTested);
+        shapes.labelBackgrounds(sink(BUFFERS.getBuffer(seeThrough), base));
+        BUFFERS.endBatch(seeThrough);
+        for (SelectionShapes.Label label : shapes.labels()) {
+            minecraft.font.drawInBatch(label.text(), label.x(), label.y(), SelectionShapes.TEXT_COLOR, false,
+                    new Matrix4f(base).mul(label.pose()), BUFFERS, Font.DisplayMode.SEE_THROUGH, 0, LightTexture.FULL_BRIGHT);
+        }
+        BUFFERS.endBatch();
+
+        if (depthTest) {
+            RenderSystem.enableDepthTest();
+        }
+    }
+
+    private static SelectionShapes.VertexSink sink(VertexConsumer consumer, Matrix4f pose) {
+        return (x, y, z, argb) -> consumer.addVertex(pose, x, y, z).setColor(argb).setLight(LightTexture.FULL_BRIGHT);
+    }
+}

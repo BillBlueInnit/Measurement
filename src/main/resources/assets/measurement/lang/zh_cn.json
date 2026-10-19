@@ -1,0 +1,19 @@
+{
+  "measurement.prefix": "[测量] ",
+  "measurement.corner.1": "角点 1：%s",
+  "measurement.corner.2": "角点 2：%s",
+  "measurement.corner.size": "%s × %s × %s = %s 个方块",
+  "measurement.command.on": "已开启。手持木铲：左键方块设置角点 1，右键方块设置角点 2。",
+  "measurement.command.off": "已关闭。木铲恢复正常使用，选区已隐藏。",
+  "measurement.command.clear": "选区已清除。",
+  "measurement.command.no_selection": "还没有选区。手持木铲：左键方块设置角点 1，右键方块设置角点 2。",
+  "measurement.command.missing_corner": "角点 %s 还没有设置。",
+  "measurement.command.other_dimension": "选区在另一个维度。",
+  "measurement.report.area": "%s 到 %s",
+  "measurement.report.length": "长 (X)：%s",
+  "measurement.report.width": "宽 (Z)：%s",
+  "measurement.report.height": "高 (Y)：%s",
+  "measurement.report.volume": "体积：%s",
+  "measurement.report.solid": "除去空气的体积：%s",
+  "measurement.report.unloaded": "未加载区块中的 %s 个方块没有计入"
+}

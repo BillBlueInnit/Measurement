@@ -1,0 +1,19 @@
+{
+  "measurement.prefix": "[Measurement] ",
+  "measurement.corner.1": "Corner 1: %s",
+  "measurement.corner.2": "Corner 2: %s",
+  "measurement.corner.size": "%s × %s × %s = %s blocks",
+  "measurement.command.on": "On. Hold a wooden shovel: left click a block for corner 1, right click a block for corner 2.",
+  "measurement.command.off": "Off. The wooden shovel works normally again and the selection is hidden.",
+  "measurement.command.clear": "Selection cleared.",
+  "measurement.command.no_selection": "Nothing selected. Hold a wooden shovel: left click a block for corner 1, right click a block for corner 2.",
+  "measurement.command.missing_corner": "Corner %s is not set yet.",
+  "measurement.command.other_dimension": "The selection is in another dimension.",
+  "measurement.report.area": "%s to %s",
+  "measurement.report.length": "Length (X): %s",
+  "measurement.report.width": "Width (Z): %s",
+  "measurement.report.height": "Height (Y): %s",
+  "measurement.report.volume": "Volume: %s",
+  "measurement.report.solid": "Volume without air: %s",
+  "measurement.report.unloaded": "%s blocks in unloaded chunks were not counted"
+}

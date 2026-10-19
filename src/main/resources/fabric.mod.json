@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "measurement",
+  "version": "${version}",
+  "name": "Measurement",
+  "description": "Hold a wooden shovel and left/right click two blocks to select an area. The area is drawn in the world with its size on the edges, and /measurement prints its length, width, height, volume and volume without air.",
+  "authors": ["Bill Blue"],
+  "contact": {
+    "sources": "https://github.com/BillBlueInnit/Measurement",
+    "issues": "https://github.com/BillBlueInnit/Measurement/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/measurement/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.bill.measurement.MeasurementClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "${minecraft_dependency}",
+    "java": ">=${java_version}",
+    "fabric-api": "*"
+  }
+}

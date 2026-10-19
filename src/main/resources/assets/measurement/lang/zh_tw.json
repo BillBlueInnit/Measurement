@@ -1,0 +1,19 @@
+{
+  "measurement.prefix": "[測量] ",
+  "measurement.corner.1": "角點 1：%s",
+  "measurement.corner.2": "角點 2：%s",
+  "measurement.corner.size": "%s × %s × %s = %s 個方塊",
+  "measurement.command.on": "已開啟。手持木鏟：左鍵方塊設定角點 1，右鍵方塊設定角點 2。",
+  "measurement.command.off": "已關閉。木鏟恢復正常使用，選取範圍已隱藏。",
+  "measurement.command.clear": "選取範圍已清除。",
+  "measurement.command.no_selection": "還沒有選取範圍。手持木鏟：左鍵方塊設定角點 1，右鍵方塊設定角點 2。",
+  "measurement.command.missing_corner": "角點 %s 還沒有設定。",
+  "measurement.command.other_dimension": "選取範圍在另一個維度。",
+  "measurement.report.area": "%s 到 %s",
+  "measurement.report.length": "長 (X)：%s",
+  "measurement.report.width": "寬 (Z)：%s",
+  "measurement.report.height": "高 (Y)：%s",
+  "measurement.report.volume": "體積：%s",
+  "measurement.report.solid": "扣除空氣的體積：%s",
+  "measurement.report.unloaded": "未載入區塊中的 %s 個方塊沒有計入"
+}
