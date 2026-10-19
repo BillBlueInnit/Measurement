@@ -1,6 +1,5 @@
 package com.bill.measurement.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -13,9 +12,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
 
-/** Draws {@link SelectionShapes} with Minecraft 1.21 - 1.21.4 rendering. */
+/** Draws {@link SelectionShapes} with Minecraft 1.21.5 rendering. */
 public final class SelectionRenderer {
     private static final MultiBufferSource.BufferSource BUFFERS = MultiBufferSource.immediate(new ByteBufferBuilder(4096));
 
@@ -39,12 +37,6 @@ public final class SelectionRenderer {
             return;
         }
 
-        // The see-through render types only skip turning the depth test on; they expect it to be off already.
-        // Sodium and Iris can leave it on at this point, so switch it off, keeping RenderSystem's state in sync.
-        boolean depthTest = GL11.glIsEnabled(GL11.GL_DEPTH_TEST);
-        RenderSystem.enableDepthTest();
-        RenderSystem.disableDepthTest();
-
         Matrix4f base = poseStack.last().pose();
         RenderType seeThrough = RenderType.textBackgroundSeeThrough();
         RenderType depthTested = RenderType.textBackground();
@@ -61,10 +53,6 @@ public final class SelectionRenderer {
                     new Matrix4f(base).mul(label.pose()), BUFFERS, Font.DisplayMode.SEE_THROUGH, 0, LightTexture.FULL_BRIGHT);
         }
         BUFFERS.endBatch();
-
-        if (depthTest) {
-            RenderSystem.enableDepthTest();
-        }
     }
 
     private static SelectionShapes.VertexSink sink(VertexConsumer consumer, Matrix4f pose) {
