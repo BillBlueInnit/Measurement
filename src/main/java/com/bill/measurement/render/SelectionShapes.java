@@ -45,8 +45,29 @@ public final class SelectionShapes {
         void vertex(float x, float y, float z, int argb);
     }
 
+    /** Receives each piece of a line as a quad: {@code a} and {@code b} across one end, {@code c} and {@code d} across the other. */
+    public interface QuadSink {
+        void quad(Vector3f a, Vector3f b, Vector3f c, Vector3f d, int argb);
+    }
+
     /** A size label. {@code pose} maps label space, where one unit is one font pixel, to camera space. */
     public record Label(Matrix4f pose, String text, float x, float y, int textWidth) {
+        /** The edges of the colored square behind the text, in label space. */
+        public float left() {
+            return x - LABEL_PADDING;
+        }
+
+        public float right() {
+            return x + textWidth - 1 + LABEL_PADDING;
+        }
+
+        public float top() {
+            return y - LABEL_PADDING;
+        }
+
+        public float bottom() {
+            return y + 7 + LABEL_PADDING;
+        }
     }
 
     private final Selection selection;
@@ -81,12 +102,17 @@ public final class SelectionShapes {
      * moved the fraction {@code towardCamera} of the way to the camera.
      */
     public void lines(VertexSink sink, float alpha, float towardCamera) {
+        lines(vertices(sink), alpha, towardCamera);
+    }
+
+    /** Like {@link #lines(VertexSink, float, float)}, one quad per piece of line. */
+    public void lines(QuadSink sink, float alpha, float towardCamera) {
         float scale = 1 - towardCamera;
-        lines((x, y, z, argb) -> sink.vertex(x * scale, y * scale, z * scale,
+        lines((a, b, c, d, argb) -> sink.quad(a.mul(scale), b.mul(scale), c.mul(scale), d.mul(scale),
                 ((int) ((argb >>> 24) * alpha) << 24) | (argb & 0xFFFFFF)));
     }
 
-    private void lines(VertexSink sink) {
+    private void lines(QuadSink sink) {
         if (selection.first() != null) {
             corner(sink, selection.first(), FIRST_COLOR);
         }
@@ -102,16 +128,13 @@ public final class SelectionShapes {
 
     /** The colored squares behind the label text, as quads. Draw them after {@link #lines} and before the text. */
     public void labelBackgrounds(VertexSink sink) {
+        QuadSink quads = vertices(sink);
         for (Label label : labels) {
-            float x0 = label.x() - LABEL_PADDING;
-            float x1 = label.x() + label.textWidth() - 1 + LABEL_PADDING;
-            float y0 = label.y() - LABEL_PADDING;
-            float y1 = label.y() + 7 + LABEL_PADDING;
-            Vector3f a = label.pose().transformPosition(new Vector3f(x0, y0, 0));
-            Vector3f b = label.pose().transformPosition(new Vector3f(x0, y1, 0));
-            Vector3f c = label.pose().transformPosition(new Vector3f(x1, y1, 0));
-            Vector3f d = label.pose().transformPosition(new Vector3f(x1, y0, 0));
-            quad(sink, a, b, c, d, BOX_COLOR);
+            Vector3f a = label.pose().transformPosition(new Vector3f(label.left(), label.top(), 0));
+            Vector3f b = label.pose().transformPosition(new Vector3f(label.left(), label.bottom(), 0));
+            Vector3f c = label.pose().transformPosition(new Vector3f(label.right(), label.bottom(), 0));
+            Vector3f d = label.pose().transformPosition(new Vector3f(label.right(), label.top(), 0));
+            quads.quad(a, b, c, d, BOX_COLOR);
         }
     }
 
@@ -120,11 +143,11 @@ public final class SelectionShapes {
         return labels;
     }
 
-    private void corner(VertexSink sink, BlockPos pos, int color) {
+    private void corner(QuadSink sink, BlockPos pos, int color) {
         box(sink, pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1, CORNER_INFLATE, color);
     }
 
-    private void box(VertexSink sink, double x0, double y0, double z0, double x1, double y1, double z1, float inflate, int color) {
+    private void box(QuadSink sink, double x0, double y0, double z0, double x1, double y1, double z1, float inflate, int color) {
         float ax = (float) (x0 - cameraX) - inflate;
         float ay = (float) (y0 - cameraY) - inflate;
         float az = (float) (z0 - cameraZ) - inflate;
@@ -148,7 +171,7 @@ public final class SelectionShapes {
         }
     }
 
-    private static void line(VertexSink sink, float ax, float ay, float az, float bx, float by, float bz, int color) {
+    private static void line(QuadSink sink, float ax, float ay, float az, float bx, float by, float bz, int color) {
         float dx = bx - ax;
         float dy = by - ay;
         float dz = bz - az;
@@ -171,7 +194,7 @@ public final class SelectionShapes {
             if (sideP == null || sideQ == null) {
                 continue;
             }
-            quad(sink, new Vector3f(p).add(sideP), new Vector3f(p).sub(sideP),
+            sink.quad(new Vector3f(p).add(sideP), new Vector3f(p).sub(sideP),
                     new Vector3f(q).sub(sideQ), new Vector3f(q).add(sideQ), color);
         }
     }
@@ -186,16 +209,18 @@ public final class SelectionShapes {
         return side.mul(HALF_WIDTH * point.length() / length);
     }
 
-    /** Emits the quad with both windings so it shows whichever way culling is set up. */
-    private static void quad(VertexSink sink, Vector3f a, Vector3f b, Vector3f c, Vector3f d, int color) {
-        sink.vertex(a.x, a.y, a.z, color);
-        sink.vertex(b.x, b.y, b.z, color);
-        sink.vertex(c.x, c.y, c.z, color);
-        sink.vertex(d.x, d.y, d.z, color);
-        sink.vertex(d.x, d.y, d.z, color);
-        sink.vertex(c.x, c.y, c.z, color);
-        sink.vertex(b.x, b.y, b.z, color);
-        sink.vertex(a.x, a.y, a.z, color);
+    /** Emits each quad with both windings so it shows whichever way culling is set up. */
+    private static QuadSink vertices(VertexSink sink) {
+        return (a, b, c, d, color) -> {
+            sink.vertex(a.x, a.y, a.z, color);
+            sink.vertex(b.x, b.y, b.z, color);
+            sink.vertex(c.x, c.y, c.z, color);
+            sink.vertex(d.x, d.y, d.z, color);
+            sink.vertex(d.x, d.y, d.z, color);
+            sink.vertex(c.x, c.y, c.z, color);
+            sink.vertex(b.x, b.y, b.z, color);
+            sink.vertex(a.x, a.y, a.z, color);
+        };
     }
 
     private void addLabels(Quaternionf cameraRotation, ToIntFunction<String> textWidth) {
