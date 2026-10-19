@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
-/** Draws {@link SelectionShapes} with Minecraft 1.21.5 rendering. */
+/** Draws {@link SelectionShapes} with Minecraft 1.21.5 - 1.21.8 rendering. */
 public final class SelectionRenderer {
     private static final MultiBufferSource.BufferSource BUFFERS = MultiBufferSource.immediate(new ByteBufferBuilder(4096));
 
