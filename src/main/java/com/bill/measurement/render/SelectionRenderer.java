@@ -3,7 +3,7 @@ package com.bill.measurement.render;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
-/** Draws {@link SelectionShapes} with Minecraft 1.21.5 - 1.21.8 rendering. */
+/** Draws {@link SelectionShapes} with Minecraft 1.21.9 - 1.21.10 rendering. */
 public final class SelectionRenderer {
     private static final MultiBufferSource.BufferSource BUFFERS = MultiBufferSource.immediate(new ByteBufferBuilder(4096));
 
@@ -21,8 +21,9 @@ public final class SelectionRenderer {
     }
 
     public static void register() {
-        // LAST comes after translucent terrain, particles and weather, so nothing gets drawn over the selection
-        WorldRenderEvents.LAST.register(context -> render(context.matrixStack(), context.camera()));
+        // END_MAIN comes after terrain, translucent terrain, entities and particles
+        WorldRenderEvents.END_MAIN.register(context ->
+                render(context.matrices(), Minecraft.getInstance().gameRenderer.getMainCamera()));
     }
 
     private static void render(PoseStack poseStack, Camera camera) {
