@@ -9,11 +9,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
-/** Draws {@link SelectionShapes} with Minecraft 1.21.9 - 1.21.10 rendering. */
+/** Draws {@link SelectionShapes} with Minecraft 1.21.11 rendering. */
 public final class SelectionRenderer {
     private static final MultiBufferSource.BufferSource BUFFERS = MultiBufferSource.immediate(new ByteBufferBuilder(4096));
 
@@ -31,7 +32,7 @@ public final class SelectionRenderer {
         if (minecraft.level == null) {
             return;
         }
-        Vec3 cameraPos = camera.getPosition();
+        Vec3 cameraPos = camera.position();
         SelectionShapes shapes = SelectionShapes.forFrame(minecraft.level.dimension(), cameraPos.x, cameraPos.y, cameraPos.z,
                 camera.rotation(), minecraft.font::width);
         if (shapes == null) {
@@ -39,8 +40,8 @@ public final class SelectionRenderer {
         }
 
         Matrix4f base = poseStack.last().pose();
-        RenderType seeThrough = RenderType.textBackgroundSeeThrough();
-        RenderType depthTested = RenderType.textBackground();
+        RenderType seeThrough = RenderTypes.textBackgroundSeeThrough();
+        RenderType depthTested = RenderTypes.textBackground();
         // Separate draws, each over the previous one: the faint lines behind blocks, the lines in front of blocks,
         // the label backgrounds and the label text
         shapes.lines(sink(BUFFERS.getBuffer(seeThrough), base), SelectionShapes.HIDDEN_ALPHA, 0);
