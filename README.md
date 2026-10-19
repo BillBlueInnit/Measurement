@@ -41,9 +41,8 @@ counted and the message says how many were skipped.
 
 ## Shaders
 
-The box and its labels are drawn with the same see-through render types Minecraft uses for name tags, so they work
-with [Iris](https://modrinth.com/mod/iris) and shader packs. Tested with Iris and
-Complementary Reimagined.
+The box and its labels are drawn with the render types Minecraft uses for name tags, so they work with
+[Iris](https://modrinth.com/mod/iris) and shader packs. Tested with Iris and Complementary Reimagined.
 
 ## Supported versions
 
